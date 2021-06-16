@@ -314,7 +314,7 @@ if save_files:
     
     # save potential models table
     potential_models_table_filename = f'potential_models_table{max_table_rows}.png'
-    fig.savefig(plots_dir + potential_models_table_filename)
+    fig.savefig(plots_dir + potential_models_table_filename)  # this isn't saving properly
 
 
 #%%
@@ -327,7 +327,7 @@ optimal_model = pickle.load(open(models_dir + optimal_model_filename, 'rb'))
 x = pca_output
 y = target
 
-estimator_num = 375
+estimator_num = 7474
 
 tree_visualization = dtreeviz(optimal_model.estimators_[estimator_num], 
                               x_data=x,
@@ -338,7 +338,7 @@ tree_visualization = dtreeviz(optimal_model.estimators_[estimator_num],
                               title=f'Selected Estimator from Optimal Random Forest [{estimator_num}:10,000]')
 
 # show tree
-tree_visualization.view()    #  have to save svg manually by right click save
+tree_visualization.view()   # I have to save svg manually by right click save
 
 if save_files:
     
