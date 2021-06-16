@@ -46,9 +46,7 @@ project_dir = os.getcwd()
 data_dir = project_dir + r'/data/'
 models_dir = project_dir + r'/models/'
 plots_dir = project_dir + r'/plots/'
-
-optimal_model_name = 'RF_trees100_sample0.99_depth20'
-optimal_model_filename = f'{optimal_model_name}.pkl'
+validation_dir = project_dir + r'/validation/'
 
 # set dpi
 dpi = 300
@@ -66,7 +64,7 @@ df = pd.read_csv(data_dir + df_filename)
 
 # isolate principal components
 pca_output = df.iloc[:,-3:]
-pca_output_labels = list(pca_output.columns)
+pca_columns = list(pca_output.columns)
 
 # separate data
 target = df['target']
@@ -244,8 +242,10 @@ results_df_test_ascending_order = [True, False, False, True]
 
 results_df_test.sort_values(by=results_df_test_sort_order,
                             axis=0,
-                            ascending=results_df_test_ascending_order,
+                            ascending=results_df_test_sort_order,
                             inplace=True)
+
+results_df_test.index = range(len(results_df_test))
 
 table_columns = [#'model_name',
                  #'train_test',
@@ -302,6 +302,10 @@ model_table.scale(1,2)
 model_table.auto_set_font_size(False)
 model_table.set_fontsize(table_fontsize)
 
+# select optimal model
+optimal_model_name = results_df_test.iloc[0,0]
+optimal_model_results = pd.DataFrame([results_df_test.iloc[0,:]])
+
 if save_files:
     
     # save potential_models dataframe
@@ -317,29 +321,31 @@ if save_files:
 # Select Optimal Model and Visualize Tree
 
 # load optimal model
-rf_model = pickle.load(open(models_dir + optimal_model_filename, 'rb'))
+optimal_model_filename = f'{optimal_model_name}.pkl'
+optimal_model = pickle.load(open(models_dir + optimal_model_filename, 'rb'))
 
 x = pca_output
 y = target
 
-estimator_num = 17
+estimator_num = 375
 
-tree_visualization = dtreeviz(rf_model.estimators_[estimator_num], 
+tree_visualization = dtreeviz(optimal_model.estimators_[estimator_num], 
                               x_data=x,
                               y_data=y,
                               target_name='Predict',
-                              feature_names=pca_output_labels, 
+                              feature_names=pca_columns, 
                               class_names=['Benign', 'Malignant'], 
                               title=f'Selected Estimator from Optimal Random Forest [{estimator_num}:10,000]')
 
 # show tree
-tree_visualization.view()    #  have to save svg manually off this method
+tree_visualization.view()    #  have to save svg manually by right click save
 
 if save_files:
     
-    # save tree in dot format
-    tree_viz_filename = f'dtreeviz_estimator{estimator_num}.dot'
-    tree.export_graphviz(tree_visualization,
-                         plots_dir + tree_viz_filename,
-                         feature_names = pca_output_labels)
+    # save optimal model
+    pickle.dump(optimal_model, open(validation_dir + optimal_model_filename, 'wb'))
+    
+    # save optimal model results to file
+    optimal_model_name_filename = f'optimal_model_results.csv'
+    optimal_model_results.to_csv(validation_dir + optimal_model_name_filename, index=False)
 

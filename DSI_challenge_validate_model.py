@@ -37,15 +37,11 @@ project_dir = os.getcwd()
 data_dir = project_dir + r'/data/'
 validation_dir = project_dir + r'/validation/'
 
-optimal_model_name = 'RF_trees10000_sample0.25_depth8'
-n_trees = 10000
-test_split = 0.25
-samples = 0.25
-max_depth = 8
-decimals = 4
-
 # set dpi
 dpi = 300
+
+# set decimal precision
+decimals = 4
 
 # save files or not
 save_files = True
@@ -62,7 +58,6 @@ df_head = df.iloc[:100,:]
 
 # isolate principal components
 pca_output = df.iloc[:,-3:]
-pca_output_labels = list(pca_output.columns)
 
 # separate data
 target = df['target']
@@ -71,6 +66,20 @@ combined_input = df.iloc[:,2:]
 
 # calculate % of dataset that is positive class for target variable
 percent_target = np.round(target.sum() / target.size, 2)
+
+
+#%%
+# Load Optimal Model
+
+optimal_model_filename = 'optimal_model_results.csv'
+optimal_model_results = pd.read_csv(validation_dir + optimal_model_filename)
+
+# extract optimal hyperparameters
+optimal_model_name = optimal_model_results.iloc[0,0]
+n_trees = optimal_model_results.iloc[0,4]
+test_split = optimal_model_results.iloc[0,2]
+samples = optimal_model_results.iloc[0,5]
+depth = optimal_model_results.iloc[0,6]
 
 
 #%%
@@ -138,7 +147,7 @@ for train_index, test_index in kf.split(pca_output):
     train_test = 'Train'
     
     rf = RandomForestClassifier(n_estimators=n_trees,
-                                max_depth=max_depth,
+                                max_depth=depth,
                                 bootstrap=True,
                                 max_samples=samples)
     
@@ -182,7 +191,7 @@ for train_index, test_index in kf.split(pca_output):
                                     total_records,
                                     n_trees,
                                     samples,
-                                    max_depth,
+                                    depth,
                                     true_positive,
                                     true_negative,
                                     false_positive,
@@ -241,7 +250,7 @@ for train_index, test_index in kf.split(pca_output):
                                     total_records,
                                     n_trees,
                                     samples,
-                                    max_depth,
+                                    depth,
                                     true_positive,
                                     true_negative,
                                     false_positive,

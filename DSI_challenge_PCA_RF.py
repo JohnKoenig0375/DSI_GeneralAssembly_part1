@@ -28,6 +28,7 @@ Notes: Results of the grid search for the optimal model hyperparameters are
 
 import os
 import pickle
+import warnings
 
 import pandas as pd
 import numpy as np
@@ -37,6 +38,8 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import metrics
+
+warnings.filterwarnings("ignore")  # supress DataConversionWarning
 
 project_dir = os.getcwd()
 data_dir = project_dir + r'/data/'
@@ -48,8 +51,18 @@ ROC_test_dir = plots_dir + r'/test/'
 # set dpi
 dpi = 300
 
+# set decimal precision
+decimals = 4
+
 # save files or not
 save_files = True
+
+#%%
+# Training Hyperparameters
+
+n_trees = 10000
+samples_percent_options = [s/100 for s in range(5, 100, 5)] + [.99]
+depth_options = list(range(1,21))
 
 
 #%%
@@ -58,6 +71,7 @@ save_files = True
 # load cleaned dataframe
 df_filename = 'breast_cancer.csv'
 df = pd.read_csv(data_dir + df_filename)
+df_columns = list(df.columns)
 
 # extract input variable labels
 input_variables_labels = df_columns[2:]
@@ -193,13 +207,6 @@ results_df_columns = ['model_name',
 
 results_df = pd.DataFrame(columns=results_df_columns)
 
-# hyperparameter grid search options
-samples_percent_options = [s/100 for s in range(5, 100, 5)] + [.99]
-depth_options = list(range(1,21))
-
-n_trees = 100
-decimals = 4
-
 # conduct grid search
 for samples in samples_percent_options:
     for depth in depth_options:
@@ -279,10 +286,10 @@ for samples in samples_percent_options:
         
         
         
-        # train random forest
+        # test random forest
         train_test = 'Test'
         
-        print(f'Testing Model - {model_name}')
+        print(f' Testing Model - {model_name}')
         
         # get predictions
         x = pca_output_test

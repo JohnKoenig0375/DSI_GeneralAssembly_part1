@@ -44,6 +44,7 @@ save_files = True
 # load cleaned dataframe
 df_filename = 'breast_cancer.csv'
 df = pd.read_csv(data_dir + df_filename)
+df_columns = list(df.columns)
 
 # extract input variable labels
 input_variables_labels = df_columns[2:]
